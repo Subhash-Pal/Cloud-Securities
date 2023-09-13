@@ -1,0 +1,50 @@
+# Use the official Go image with Go 1.17 (or another compatible version)
+FROM golang:1.17 AS go_builder
+
+# Set the working directory for the Go project
+WORKDIR /go/src/app
+
+# Copy Go project files
+COPY Blocker-API/ ./Blocker-API
+
+# Build the Go project
+RUN cd Blocker-API && go build -o main .
+
+# Use the official Rust image as the base image for the Rust project
+FROM rust:1.68.0 AS rust_builder
+
+# Set the working directory for the Rust project
+WORKDIR /usr/src/app
+
+# Copy the Rust project files
+COPY xdp-drop/ ./xdp-drop
+
+# Copy the Rust project's Cargo.toml file
+COPY xdp-drop/Cargo.toml ./xdp-drop/Cargo.toml
+
+# Build the Rust project
+RUN cd xdp-drop && cargo build --release
+
+# Final image combining both projects
+FROM rust:1.68.0
+
+# Set the working directory inside the container
+WORKDIR /usr/src/app
+
+# Copy built Go binary
+COPY --from=go_builder /go/src/app/Blocker-API/main ./Blocker-API/main
+
+# Copy the built Rust binary
+COPY --from=rust_builder /usr/src/app/xdp-drop/target/release/xdp-drop ./xdp-drop/xdp-drop
+
+# Copy the executables
+COPY ./Blocker-API/server/server ./Blocker-API/server/server
+COPY ./Blocker-API/client/client ./Blocker-API/client/client
+
+# Copy the Policy folder from the root directory
+COPY ./Policy ./Policy
+
+# Set the entry point for the container to run the shell script
+COPY entrypoint.sh /usr/src/app/entrypoint.sh
+RUN chmod +x /usr/src/app/entrypoint.sh
+CMD ["/usr/src/app/entrypoint.sh"]

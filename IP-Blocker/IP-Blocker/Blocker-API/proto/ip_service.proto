@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./proto";
+
+
+    message IPRequest {
+        string ip_address = 1;
+    }
+    message IPResponse {
+        string message = 1;
+        string ip_address = 2;
+    }
+    message IPUpdate {
+        string ip_address = 1;
+    }
+    service IPService {
+        rpc SendIP (IPRequest) returns (IPResponse);
+        rpc GetIP (EmptyRequest) returns (IPResponse);
+        rpc SetIP (IPRequest) returns (EmptyResponse);  // Add this line
+        rpc WatchIPUpdates(EmptyRequest) returns (stream IPUpdate);
+    }
+    
+    message EmptyRequest {}
+    message EmptyResponse {}
