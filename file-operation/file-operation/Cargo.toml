@@ -1,0 +1,4 @@
+[workspace]
+members = ["file-operation", "file-operation-common", "xtask"]
+
+resolver = "2"

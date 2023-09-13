@@ -1,0 +1,7 @@
+{
+  "rust-analyzer.linkedProjects": [
+    "Cargo.toml",
+    "file-operation-ebpf/Cargo.toml"
+  ],
+  "git.ignoreLimitWarning": true
+}
